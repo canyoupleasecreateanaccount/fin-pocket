@@ -2,6 +2,8 @@
 
 Technical analysis signal visualization tool for stocks. Fetches historical data from Yahoo Finance and renders interactive charts with configurable technical signals.
 
+![Chart Preview](assets/chart_preview.png)
+
 ## Features
 
 | Signal | Description | Default |
@@ -27,7 +29,7 @@ pip install fin-pocket
 From source:
 
 ```bash
-git clone <repo-url> && cd fin-pocket
+git clone git@github.com:canyoupleasecreateanaccount/fin-pocket.git && cd fin-pocket
 python -m venv venv
 source venv/bin/activate   # Linux/macOS
 venv\Scripts\activate      # Windows
@@ -142,6 +144,18 @@ twine upload dist/*
 - **pandas** — data manipulation
 - **plotly** — interactive charting
 - **numpy** — numerical computations
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to submit pull requests.
+
+## Contact
+
+Email: solveme.solutions@gmail.com
+
+## Support
+
+<a href="https://www.buymeacoffee.com/yourCrowley" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" ></a>
 
 ## License
 
