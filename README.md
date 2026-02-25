@@ -9,7 +9,7 @@
 
 Technical analysis signal visualization tool for stocks. Fetches historical data from Yahoo Finance and renders interactive charts with configurable technical signals.
 
-![Chart Preview](assets/chart_preview.png)
+![Chart Preview](https://raw.githubusercontent.com/canyoupleasecreateanaccount/fin-pocket/main/assets/chart_preview.png)
 
 ## Features
 
