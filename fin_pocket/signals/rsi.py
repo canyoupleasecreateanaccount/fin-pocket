@@ -37,7 +37,7 @@ class RSI(BaseSignal):
         avg_gain = gain.rolling(window=self.period, min_periods=1).mean()
         avg_loss = loss.rolling(window=self.period, min_periods=1).mean()
         
-        rs = avg_gain / avg_loss
+        rs = avg_gain / avg_loss.replace(0, 1e-10)
         df["RSI"] = 100 - (100 / (1 + rs))
         
         df["RSI_prev"] = df["RSI"].shift(1)

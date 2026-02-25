@@ -36,7 +36,7 @@ class RSIDivergence(BaseSignal):
         avg_gain = gain.rolling(window=self.rsi_period, min_periods=1).mean()
         avg_loss = loss.rolling(window=self.rsi_period, min_periods=1).mean()
         
-        rs = avg_gain / avg_loss
+        rs = avg_gain / avg_loss.replace(0, 1e-10)
         return 100 - (100 / (1 + rs))
     
     def _find_swing_lows(self, series: pd.Series) -> pd.Series:

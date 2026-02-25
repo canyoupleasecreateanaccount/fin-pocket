@@ -89,7 +89,7 @@ class VolumeBreakout(BaseSignal):
         
         df["vol_breakout_buy"] = False
         df["vol_breakout_sell"] = False
-        df["vol_ratio"] = df["Volume"] / avg_vol
+        df["vol_ratio"] = df["Volume"] / avg_vol.replace(0, 1)
         
         closes = df["Close"].values
         prev_closes = np.roll(closes, 1)

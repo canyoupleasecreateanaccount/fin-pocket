@@ -67,7 +67,7 @@ class SupportResistance(BaseSignal):
             j = i + 1
             
             while j < len(levels):
-                if abs(levels[j] - cluster_levels[0]) / cluster_levels[0] * 100 <= self.tolerance_pct:
+                if cluster_levels[0] != 0 and abs(levels[j] - cluster_levels[0]) / cluster_levels[0] * 100 <= self.tolerance_pct:
                     cluster_levels.append(levels[j])
                     j += 1
                 else:

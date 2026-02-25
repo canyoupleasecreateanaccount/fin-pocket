@@ -74,7 +74,7 @@ class Fibonacci(BaseSignal):
         last_sl = swing_lows[-1]
 
         if last_sh[0] > last_sl[0]:
-            move_pct = (last_sh[1] - last_sl[1]) / last_sl[1] * 100
+            move_pct = (last_sh[1] - last_sl[1]) / last_sl[1] * 100 if last_sl[1] != 0 else 0
             if move_pct >= self.min_move_pct:
                 return (
                     {"price": last_sl[1], "date": last_sl[2], "idx": last_sl[0]},
@@ -82,7 +82,7 @@ class Fibonacci(BaseSignal):
                     "up",
                 )
         else:
-            move_pct = (last_sh[1] - last_sl[1]) / last_sl[1] * 100
+            move_pct = (last_sh[1] - last_sl[1]) / last_sl[1] * 100 if last_sl[1] != 0 else 0
             if move_pct >= self.min_move_pct:
                 return (
                     {"price": last_sh[1], "date": last_sh[2], "idx": last_sh[0]},
@@ -92,7 +92,7 @@ class Fibonacci(BaseSignal):
 
         best_sh = max(swing_highs, key=lambda x: x[1])
         best_sl = min(swing_lows, key=lambda x: x[1])
-        move_pct = (best_sh[1] - best_sl[1]) / best_sl[1] * 100
+        move_pct = (best_sh[1] - best_sl[1]) / best_sl[1] * 100 if best_sl[1] != 0 else 0
 
         if move_pct < self.min_move_pct:
             return None, None, None
@@ -143,8 +143,9 @@ class Fibonacci(BaseSignal):
                 "price": price,
             })
 
+        move_display = diff / low_price * 100 if low_price != 0 else 0
         print(f"[Fibonacci] Move {direction}: "
-              f"{low_price:.2f} → {high_price:.2f} ({diff / low_price * 100:.1f}%)")
+              f"{low_price:.2f} → {high_price:.2f} ({move_display:.1f}%)")
         for lv in self._levels:
             print(f"  {lv['fib']:.1%}: {lv['price']:.2f}")
 
