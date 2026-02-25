@@ -91,7 +91,7 @@ fin-pocket AAPL --no-rsi --no-sr --no-volume-breakout --no-wedge --no-flag --no-
 # Enable RSI divergence
 fin-pocket AMZN --rsi-divergence
 ```
-
+ 
 ## Project Structure
 
 ```
