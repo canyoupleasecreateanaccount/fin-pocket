@@ -33,7 +33,10 @@ class Chart:
         df = self.data.copy()
         
         for signal in self.signals:
-            df = signal.calculate(df)
+            try:
+                df = signal.calculate(df)
+            except Exception as exc:
+                print(f"Warning: signal '{signal.name}' failed: {exc}")
         
         self._processed_data = df
         return df
@@ -127,6 +130,8 @@ class Chart:
         price_min = display_df["Low"].min()
         price_max = display_df["High"].max()
         price_range = price_max - price_min
+        if price_range == 0:
+            price_range = price_max * 0.1 or 1.0
         y_min = price_min - price_range * 0.05
         y_max = price_max + price_range * 0.1
         

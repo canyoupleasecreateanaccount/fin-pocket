@@ -64,6 +64,8 @@ class Pennant(BaseSignal):
 
             low_in_pole = float(np.min(lows[start_idx : start_idx + max(1, length // 3) + 1]))
             high_at_peak = float(highs[peak_idx])
+            if low_in_pole == 0:
+                continue
             move_pct = (high_at_peak - low_in_pole) / low_in_pole * 100
 
             if move_pct < self.min_pole_move_pct:
@@ -98,6 +100,8 @@ class Pennant(BaseSignal):
 
             high_in_pole = float(np.max(highs[start_idx : start_idx + max(1, length // 3) + 1]))
             low_at_trough = float(lows[trough_idx])
+            if high_in_pole == 0:
+                continue
             move_pct = (high_in_pole - low_at_trough) / high_in_pole * 100
 
             if move_pct < self.min_pole_move_pct:

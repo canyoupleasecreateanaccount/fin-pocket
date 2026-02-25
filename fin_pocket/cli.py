@@ -89,7 +89,12 @@ def main(args: argparse.Namespace) -> None:
     is_hourly = args.timeframe == "hourly"
 
     provider = DataProvider(args.ticker)
-    data = provider.fetch(period=config["period"], interval=config["interval"])
+
+    try:
+        data = provider.fetch(period=config["period"], interval=config["interval"])
+    except (ConnectionError, ValueError) as exc:
+        print(f"Error: {exc}")
+        return
 
     print(f"Loaded {len(data)} records for {args.ticker} ({args.timeframe})")
     print(f"Period: {data.index[0]} — {data.index[-1]}")

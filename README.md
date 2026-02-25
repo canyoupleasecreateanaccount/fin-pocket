@@ -1,8 +1,15 @@
 # fin-pocket
 
+[![PyPI version](https://img.shields.io/pypi/v/fin-pocket)](https://pypi.org/project/fin-pocket/)
+[![Python](https://img.shields.io/pypi/pyversions/fin-pocket)](https://pypi.org/project/fin-pocket/)
+[![CI](https://github.com/canyoupleasecreateanaccount/fin-pocket/actions/workflows/ci.yml/badge.svg)](https://github.com/canyoupleasecreateanaccount/fin-pocket/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/canyoupleasecreateanaccount/fin-pocket/branch/main/graph/badge.svg)](https://codecov.io/gh/canyoupleasecreateanaccount/fin-pocket)
+[![Downloads](https://img.shields.io/pypi/dm/fin-pocket)](https://pypi.org/project/fin-pocket/)
+[![License](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
+
 Technical analysis signal visualization tool for stocks. Fetches historical data from Yahoo Finance and renders interactive charts with configurable technical signals.
 
-![Chart Preview](assets/chart_preview.png)
+![Chart Preview](https://raw.githubusercontent.com/canyoupleasecreateanaccount/fin-pocket/main/assets/chart_preview.png)
 
 ## Features
 

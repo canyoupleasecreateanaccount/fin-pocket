@@ -1,6 +1,5 @@
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta
 
 
 class DataProvider:
@@ -28,19 +27,34 @@ class DataProvider:
         
         Returns:
             DataFrame with columns: Open, High, Low, Close, Volume
+        
+        Raises:
+            ConnectionError: If Yahoo Finance is unreachable
+            ValueError: If no data is returned for the ticker
         """
-        ticker_obj = yf.Ticker(self.ticker)
+        try:
+            ticker_obj = yf.Ticker(self.ticker)
+            
+            if start:
+                self._data = ticker_obj.history(start=start, end=end, interval=interval)
+            else:
+                self._data = ticker_obj.history(period=period, interval=interval)
+        except Exception as exc:
+            raise ConnectionError(
+                f"Failed to fetch data for {self.ticker}: {exc}"
+            ) from exc
         
-        if start:
-            self._data = ticker_obj.history(start=start, end=end, interval=interval)
-        else:
-            self._data = ticker_obj.history(period=period, interval=interval)
-        
-        if self._data.empty:
+        if self._data is None or self._data.empty:
             raise ValueError(f"No data available for ticker {self.ticker}")
         
+        required = {"Open", "High", "Low", "Close", "Volume"}
+        missing = required - set(self._data.columns)
+        if missing:
+            raise ValueError(f"Missing columns in data: {missing}")
+        
         self._data.index = pd.to_datetime(self._data.index)
-        self._data.index = self._data.index.tz_localize(None)
+        if self._data.index.tz is not None:
+            self._data.index = self._data.index.tz_localize(None)
         
         return self._data
     

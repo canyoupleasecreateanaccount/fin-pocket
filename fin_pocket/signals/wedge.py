@@ -185,6 +185,9 @@ class Wedge(BaseSignal):
                 
                 h_int = upper["intercept"]
                 l_int = lower["intercept"]
+                if h_slope == l_slope:
+                    rejects["slope"] += 1
+                    continue
                 ax = (l_int - h_int) / (h_slope - l_slope)
                 ay = h_slope * ax + h_int
                 
