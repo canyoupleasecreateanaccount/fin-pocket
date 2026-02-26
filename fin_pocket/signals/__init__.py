@@ -8,6 +8,11 @@ from .wedge import Wedge
 from .volume_breakout import VolumeBreakout
 from .pennant import Pennant
 from .fibonacci import Fibonacci
+from .double_top_bottom import DoubleTopBottom
+from .atr import ATR
+from .macd import MACD
+from .obv import OBV
+from .bollinger_bands import BollingerBands
 
 __all__ = [
     "BaseSignal",
@@ -20,4 +25,9 @@ __all__ = [
     "VolumeBreakout",
     "Pennant",
     "Fibonacci",
+    "DoubleTopBottom",
+    "ATR",
+    "MACD",
+    "OBV",
+    "BollingerBands",
 ]

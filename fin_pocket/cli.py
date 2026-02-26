@@ -21,6 +21,11 @@ from fin_pocket.signals import (
     VolumeBreakout,
     Pennant,
     Fibonacci,
+    DoubleTopBottom,
+    ATR,
+    MACD,
+    OBV,
+    BollingerBands,
 )
 from fin_pocket.chart import Chart
 
@@ -74,12 +79,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     signals_group.add_argument("--no-ma", action="store_true", help="Disable Moving Averages")
     signals_group.add_argument("--no-ma-cross", action="store_true", help="Disable MA Crossover (Golden/Death Cross)")
     signals_group.add_argument("--no-rsi", action="store_true", help="Disable RSI")
-    signals_group.add_argument("--rsi-divergence", action="store_true", help="Enable RSI Divergence (off by default)")
+    signals_group.add_argument("--no-rsi-divergence", action="store_true", help="Disable RSI Divergence")
     signals_group.add_argument("--no-sr", action="store_true", help="Disable Support/Resistance levels")
     signals_group.add_argument("--no-volume-breakout", action="store_true", help="Disable Volume Breakout")
     signals_group.add_argument("--no-wedge", action="store_true", help="Disable Wedge patterns")
     signals_group.add_argument("--no-flag", action="store_true", help="Disable Flag & Pennant patterns")
     signals_group.add_argument("--no-fibonacci", action="store_true", help="Disable Fibonacci Retracement")
+    signals_group.add_argument("--no-double", action="store_true", help="Disable Double Top/Bottom")
+    signals_group.add_argument("--bb", action="store_true", help="Enable Bollinger Bands (off by default)")
+    signals_group.add_argument("--no-macd", action="store_true", help="Disable MACD")
+    signals_group.add_argument("--no-atr", action="store_true", help="Disable ATR")
+    signals_group.add_argument("--no-obv", action="store_true", help="Disable OBV")
 
     return parser.parse_args(argv)
 
@@ -118,7 +128,7 @@ def main(args: argparse.Namespace) -> None:
     if not args.no_rsi:
         chart.add_signal(RSI())
 
-    if args.rsi_divergence:
+    if not args.no_rsi_divergence:
         chart.add_signal(RSIDivergence())
 
     if not args.no_sr:
@@ -159,6 +169,24 @@ def main(args: argparse.Namespace) -> None:
             chart.add_signal(Fibonacci(lookback=5, min_move_pct=3.0, recent_bars=150))
         else:
             chart.add_signal(Fibonacci())
+
+    if not args.no_double:
+        if is_hourly:
+            chart.add_signal(DoubleTopBottom(lookback=5, min_distance=10, max_distance=80, recent_bars=200))
+        else:
+            chart.add_signal(DoubleTopBottom())
+
+    if args.bb:
+        chart.add_signal(BollingerBands())
+
+    if not args.no_macd:
+        chart.add_signal(MACD())
+
+    if not args.no_atr:
+        chart.add_signal(ATR())
+
+    if not args.no_obv:
+        chart.add_signal(OBV())
 
     if args.output:
         chart.save(args.output)

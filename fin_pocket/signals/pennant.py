@@ -23,10 +23,10 @@ class Pennant(BaseSignal):
         lookback: int = 5,
         min_pole_bars: int = 3,
         max_pole_bars: int = 7,
-        min_pole_move_pct: float = 5.0,
+        min_pole_move_pct: float = 7.0,
         min_body_bars: int = 7,
-        max_body_bars: int = 35,
-        max_retrace_pct: float = 0.50,
+        max_body_bars: int = 25,
+        max_retrace_pct: float = 0.45,
     ):
         self.lookback = lookback
         self.min_pole_bars = min_pole_bars
@@ -152,7 +152,7 @@ class Pennant(BaseSignal):
         if span < self.min_body_bars:
             return None
 
-        if span > pole_length * 2:
+        if span > pole_length * 1.5:
             return None
 
         x = np.arange(span, dtype=float)
@@ -163,25 +163,27 @@ class Pennant(BaseSignal):
         l_slope, l_int = np.polyfit(x, l_vals, 1)
 
         pole_height = abs(pole_end_price - pole_start_price)
+        if pole_height == 0:
+            return None
         avg_channel_width = np.mean(h_vals - l_vals)
-        if avg_channel_width > pole_height * 0.50:
+        if avg_channel_width > pole_height * 0.35:
             return None
 
         avg_slope = (h_slope + l_slope) / 2
 
         if direction == "bull":
-            if avg_slope > 0:
+            if avg_slope >= 0:
                 return None
 
             retrace = abs(pole_end_price - np.min(l_vals)) / pole_height
-            if retrace > self.max_retrace_pct or retrace < 0.08:
+            if retrace > self.max_retrace_pct or retrace < 0.10:
                 return None
         else:
-            if avg_slope < 0:
+            if avg_slope <= 0:
                 return None
 
             retrace = abs(np.max(h_vals) - pole_end_price) / pole_height
-            if retrace > self.max_retrace_pct or retrace < 0.08:
+            if retrace > self.max_retrace_pct or retrace < 0.10:
                 return None
 
         width_start = h_int - l_int
@@ -354,16 +356,6 @@ class Pennant(BaseSignal):
                 "score": c["score"],
             })
 
-        print(f"[Flag/Pennant] Found {len(self._patterns)} patterns:")
-        for p in self._patterns:
-            label = "Flag" if p["form"] == "flag" else "Pennant"
-            print(
-                f"  {p['type']} {label}: {p['pole_start_date'].strftime('%Y-%m-%d')} → "
-                f"{p['body_end_date'].strftime('%Y-%m-%d')}, "
-                f"pole={p['pole_move_pct']:.1f}%, retrace={p['body']['retrace']:.0%}, "
-                f"width_ratio={p['body']['width_ratio']:.0%}"
-            )
-
         return df
 
     def plot(self, fig: go.Figure, data: pd.DataFrame, row: int = 1) -> go.Figure:
@@ -424,7 +416,8 @@ class Pennant(BaseSignal):
                 col=1,
             )
 
-            # Upper line of channel/triangle
+            fill_color = "rgba(38,166,154,0.12)" if is_bull else "rgba(239,83,80,0.12)"
+
             fig.add_trace(
                 go.Scatter(
                     x=[pat["body_start_date"], pat["body_end_date"]],
@@ -437,13 +430,14 @@ class Pennant(BaseSignal):
                 col=1,
             )
 
-            # Lower line of channel/triangle
             fig.add_trace(
                 go.Scatter(
                     x=[pat["body_start_date"], pat["body_end_date"]],
                     y=[body["l_start_val"], body["l_end_val"]],
                     mode="lines",
                     line=dict(color=color, width=2),
+                    fill="tonexty",
+                    fillcolor=fill_color,
                     showlegend=False,
                 ),
                 row=row,

@@ -121,14 +121,6 @@ class Wedge(BaseSignal):
                         "slope": slope, "intercept": intercept,
                     })
         
-        print(f"[Wedge] {len(upper_lines)} upper, {len(lower_lines)} lower trendlines")
-        for ul in upper_lines:
-            print(f"  Upper: {ul['p1']['date'].strftime('%Y-%m-%d')} → {ul['p2']['date'].strftime('%Y-%m-%d')}, "
-                  f"idx {ul['p1']['idx']}-{ul['p2']['idx']}, slope={ul['slope']:.4f}")
-        for ll in lower_lines:
-            print(f"  Lower: {ll['p1']['date'].strftime('%Y-%m-%d')} → {ll['p2']['date'].strftime('%Y-%m-%d')}, "
-                  f"idx {ll['p1']['idx']}-{ll['p2']['idx']}, slope={ll['slope']:.4f}")
-        
         rejects = {"time": 0, "val": 0, "slope": 0, "conv": 0, "type": 0, "apex": 0}
         
         for upper in upper_lines:
@@ -244,13 +236,6 @@ class Wedge(BaseSignal):
                 })
         
         self._wedges.sort(key=lambda x: -x["score"])
-        
-        print(f"[Wedge] Rejects: {rejects}")
-        print(f"[Wedge] Found {len(self._wedges)} wedges:")
-        for w in self._wedges:
-            print(f"  {w['type']}: {w['h1']['date'].strftime('%Y-%m-%d')} → "
-                  f"{w['h2']['date'].strftime('%Y-%m-%d')}, conv={w['conv']:.0%}, "
-                  f"touches={len(w['h_touches'])}+{len(w['l_touches'])}")
         
         return df
     

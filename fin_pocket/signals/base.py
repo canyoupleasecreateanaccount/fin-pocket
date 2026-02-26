@@ -10,7 +10,7 @@ class BaseSignal(ABC):
     @abstractmethod
     def name(self) -> str:
         """Signal name."""
-        pass
+        pass  # pragma: no cover
     
     @property
     def panel(self) -> str:
@@ -31,7 +31,7 @@ class BaseSignal(ABC):
         Returns:
             DataFrame with additional columns for indicator
         """
-        pass
+        pass  # pragma: no cover
     
     @abstractmethod
     def plot(self, fig: go.Figure, data: pd.DataFrame, row: int = 1) -> go.Figure:
@@ -46,4 +46,4 @@ class BaseSignal(ABC):
         Returns:
             Updated Figure object
         """
-        pass
+        pass  # pragma: no cover
