@@ -59,10 +59,15 @@ class Chart:
         
         num_rows = 2 + len(separate_signals)
         
-        row_heights = [0.55]
+        main_weight = 0.45
+        sep_weight = 0.08
+        vol_weight = 0.08
+        total = main_weight + sep_weight * len(separate_signals) + vol_weight
+
+        row_heights = [main_weight / total]
         for _ in separate_signals:
-            row_heights.append(0.15)
-        row_heights.append(0.15)
+            row_heights.append(sep_weight / total)
+        row_heights.append(vol_weight / total)
         
         fig = make_subplots(
             rows=num_rows,
@@ -87,6 +92,16 @@ class Chart:
             col=1,
         )
         
+        last_close = display_df["Close"].iloc[-1]
+        close_color = "#26A69A" if last_close >= display_df["Open"].iloc[-1] else "#EF5350"
+        fig.add_annotation(
+            x=display_df.index[-1], y=last_close,
+            text=f" {last_close:.2f}",
+            showarrow=False, xanchor="left", xshift=100,
+            font=dict(color=close_color, size=10, family="monospace"),
+            row=1, col=1,
+        )
+
         for signal in main_signals:
             signal.plot(fig, display_df, row=1)
         

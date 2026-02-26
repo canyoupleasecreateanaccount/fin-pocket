@@ -148,7 +148,9 @@ class Fibonacci(BaseSignal):
         if not self._levels:
             return fig
 
-        x_start = data.index[0]
+        n = len(data)
+        quarter_start = max(0, n - n // 4)
+        x_line_start = data.index[quarter_start]
         x_end = data.index[-1]
 
         for lv in self._levels:
@@ -156,15 +158,28 @@ class Fibonacci(BaseSignal):
             price = lv["price"]
             color = FIB_COLORS.get(fib, "rgba(255,255,255,0.5)")
 
-            fig.add_hline(
+            fig.add_trace(
+                go.Scatter(
+                    x=[x_line_start, x_end],
+                    y=[price, price],
+                    mode="lines",
+                    line=dict(color=color, width=1, dash="dash"),
+                    name=f"Fib {fib:.1%}",
+                    showlegend=False,
+                    hovertemplate=f"Fib {fib:.1%}: {price:.2f}<extra></extra>",
+                ),
+                row=row,
+                col=1,
+            )
+
+            fig.add_annotation(
+                x=x_end,
                 y=price,
-                line_dash="dash",
-                line_color=color,
-                line_width=1,
-                annotation_text=f"Fib {fib:.1%}: {price:.2f}",
-                annotation_position="right",
-                annotation_font_color=color,
-                annotation_font_size=9,
+                text=f"Fib {fib:.1%}: {price:.2f}",
+                showarrow=False,
+                xanchor="left",
+                font=dict(color=color, size=9),
+                xshift=5,
                 row=row,
                 col=1,
             )
@@ -172,6 +187,7 @@ class Fibonacci(BaseSignal):
         if self._swing_low and self._swing_high:
             sh_date = self._swing_high["date"]
             sl_date = self._swing_low["date"]
+            x_start = data.index[0]
 
             if sh_date >= x_start and sh_date <= x_end:
                 fig.add_trace(

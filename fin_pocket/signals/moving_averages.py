@@ -32,6 +32,9 @@ class MovingAverages(BaseSignal):
     
     def plot(self, fig: go.Figure, data: pd.DataFrame, row: int = 1) -> go.Figure:
         """Adds MA lines to the chart."""
+        x_last = data.index[-1]
+        ma_values = []
+
         for period in self.periods:
             col_name = f"MA_{period}"
             if col_name not in data.columns:
@@ -51,5 +54,20 @@ class MovingAverages(BaseSignal):
                 row=row,
                 col=1,
             )
-        
+
+            last_val = data[col_name].iloc[-1]
+            if pd.notna(last_val):
+                ma_values.append((last_val, color, f"MA {period}"))
+
+        ma_values.sort(key=lambda t: t[0], reverse=True)
+        for i, (val, color, label) in enumerate(ma_values):
+            fig.add_annotation(
+                x=x_last, y=val,
+                text=f" {label}: {val:.2f}",
+                showarrow=False, xanchor="left", xshift=100,
+                yshift=10 - i * 12,
+                font=dict(color=color, size=9),
+                row=row, col=1,
+            )
+
         return fig
