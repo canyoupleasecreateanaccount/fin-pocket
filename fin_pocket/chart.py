@@ -1,8 +1,12 @@
+import logging
+
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from fin_pocket.signals.base import BaseSignal
+
+logger = logging.getLogger(__name__)
 
 
 class Chart:
@@ -36,7 +40,7 @@ class Chart:
             try:
                 df = signal.calculate(df)
             except Exception as exc:
-                print(f"Warning: signal '{signal.name}' failed: {exc}")
+                logger.warning("signal '%s' failed: %s", signal.name, exc)
         
         self._processed_data = df
         return df

@@ -104,10 +104,6 @@ class VolumeBreakout(BaseSignal):
             df.loc[breakout_up & high_vol, "vol_breakout_buy"] = True
             df.loc[breakout_down & high_vol, "vol_breakout_sell"] = True
         
-        buy_count = df["vol_breakout_buy"].sum()
-        sell_count = df["vol_breakout_sell"].sum()
-        print(f"[VolumeBreakout] {buy_count} buy, {sell_count} sell signals")
-        
         return df
     
     def plot(self, fig: go.Figure, data: pd.DataFrame, row: int = 1) -> go.Figure:

@@ -40,33 +40,34 @@ class TestCLI:
         args = parse_args(["AAPL", "--no-rsi"])
         assert args.no_rsi is True
 
-    def test_rsi_divergence_off_by_default(self):
+    def test_rsi_divergence_on_by_default(self):
         args = parse_args(["AAPL"])
-        assert args.rsi_divergence is False
+        assert args.no_rsi_divergence is False
 
-    def test_rsi_divergence_enable(self):
-        args = parse_args(["AAPL", "--rsi-divergence"])
-        assert args.rsi_divergence is True
+    def test_rsi_divergence_disable(self):
+        args = parse_args(["AAPL", "--no-rsi-divergence"])
+        assert args.no_rsi_divergence is True
 
     def test_all_disable_flags(self):
         args = parse_args([
             "AAPL",
             "--no-ma", "--no-ma-cross", "--no-rsi",
+            "--no-rsi-divergence",
             "--no-sr", "--no-volume-breakout", "--no-wedge",
-            "--no-flag", "--no-fibonacci",
+            "--no-flag", "--no-fibonacci", "--no-double",
         ])
         assert args.no_ma is True
         assert args.no_ma_cross is True
         assert args.no_rsi is True
+        assert args.no_rsi_divergence is True
         assert args.no_sr is True
         assert args.no_volume_breakout is True
         assert args.no_wedge is True
         assert args.no_flag is True
         assert args.no_fibonacci is True
+        assert args.no_double is True
 
     def test_all_enable_flags(self):
-        args = parse_args([
-            "AAPL",
-            "--rsi-divergence",
-        ])
-        assert args.rsi_divergence is True
+        args = parse_args(["AAPL"])
+        assert args.no_rsi_divergence is False
+        assert args.no_double is False

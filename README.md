@@ -18,11 +18,12 @@ Technical analysis signal visualization tool for stocks. Fetches historical data
 | **Moving Averages** | MA 50 / 100 / 200 (configurable periods) | On |
 | **MA Crossover** | Golden Cross & Death Cross detection | On |
 | **RSI** | Relative Strength Index with overbought/oversold zones | On |
-| **RSI Divergence** | Bullish/bearish divergence between price and RSI | Off |
+| **RSI Divergence** | Bullish/bearish divergence between price and RSI | On |
 | **Support / Resistance** | Pivot-based S/R level detection with clustering | On |
 | **Volume Breakout** | S/R breakout confirmed by above-average volume | On |
 | **Wedge** | Rising and falling wedge pattern detection | On |
 | **Flag & Pennant** | Flagpole + parallel channel or converging triangle | On |
+| **Double Top/Bottom** | Double top (bearish) and double bottom (bullish) reversal patterns | On |
 | **Fibonacci Retracement** | Key retracement levels from the last major swing | On |
 
 ## Installation
@@ -72,12 +73,13 @@ signals:
   --no-ma               Disable Moving Averages
   --no-ma-cross         Disable MA Crossover
   --no-rsi              Disable RSI
-  --rsi-divergence      Enable RSI Divergence
+  --no-rsi-divergence   Disable RSI Divergence
   --no-sr               Disable Support/Resistance levels
   --no-volume-breakout  Disable Volume Breakout
   --no-wedge            Disable Wedge patterns
   --no-flag             Disable Flag & Pennant patterns
   --no-fibonacci        Disable Fibonacci Retracement
+  --no-double           Disable Double Top/Bottom
 ```
 
 ### Examples
@@ -93,10 +95,7 @@ fin-pocket TSLA --timeframe hourly --no-wedge
 fin-pocket MSFT --output msft_chart.html
 
 # Minimal chart — only price and moving averages
-fin-pocket AAPL --no-rsi --no-sr --no-volume-breakout --no-wedge --no-flag --no-fibonacci
-
-# Enable RSI divergence
-fin-pocket AMZN --rsi-divergence
+fin-pocket AAPL --no-rsi --no-rsi-divergence --no-sr --no-volume-breakout --no-wedge --no-flag --no-fibonacci --no-double
 ```
  
 ## Project Structure
@@ -122,6 +121,7 @@ fin-pocket/
 │       ├── volume_breakout.py
 │       ├── wedge.py
 │       ├── pennant.py   # Flag & Pennant
+│       ├── double_top_bottom.py
 │       └── fibonacci.py # Fibonacci Retracement
 ├── tests/
 │   └── ...
@@ -137,13 +137,6 @@ pytest
 pytest --cov=fin_pocket
 ```
 
-## Building & Publishing
-
-```bash
-pip install build twine
-python -m build
-twine upload dist/*
-```
 
 ## Dependencies
 

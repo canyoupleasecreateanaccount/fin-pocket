@@ -117,7 +117,6 @@ class Fibonacci(BaseSignal):
 
         if swing_a is None:
             self._levels = []
-            print("[Fibonacci] No significant move found for Fibonacci levels")
             return df
 
         self._direction = direction
@@ -142,12 +141,6 @@ class Fibonacci(BaseSignal):
                 "fib": fib,
                 "price": price,
             })
-
-        move_display = diff / low_price * 100 if low_price != 0 else 0
-        print(f"[Fibonacci] Move {direction}: "
-              f"{low_price:.2f} → {high_price:.2f} ({move_display:.1f}%)")
-        for lv in self._levels:
-            print(f"  {lv['fib']:.1%}: {lv['price']:.2f}")
 
         return df
 

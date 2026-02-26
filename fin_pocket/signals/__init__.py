@@ -8,6 +8,7 @@ from .wedge import Wedge
 from .volume_breakout import VolumeBreakout
 from .pennant import Pennant
 from .fibonacci import Fibonacci
+from .double_top_bottom import DoubleTopBottom
 
 __all__ = [
     "BaseSignal",
@@ -20,4 +21,5 @@ __all__ = [
     "VolumeBreakout",
     "Pennant",
     "Fibonacci",
+    "DoubleTopBottom",
 ]
