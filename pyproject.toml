@@ -7,12 +7,13 @@ name = "fin-pocket"
 dynamic = ["version"]
 description = "Technical analysis signal visualization tool for stocks"
 readme = "README.md"
-license = "LicenseRef-Proprietary"
+license = "MIT"
 requires-python = ">=3.12"
 keywords = ["finance", "stocks", "technical-analysis", "charting", "signals"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",

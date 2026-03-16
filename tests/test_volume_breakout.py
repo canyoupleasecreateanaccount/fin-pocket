@@ -45,3 +45,25 @@ class TestVolumeBreakout:
         original_cols = set(sample_ohlcv.columns)
         vb.calculate(sample_ohlcv)
         assert set(sample_ohlcv.columns) == original_cols
+
+    def test_buy_signal_plotted(self):
+        """Ensure buy signal markers appear when vol_breakout_buy is True."""
+        import numpy as np
+        n = 50
+        dates = pd.bdate_range("2024-01-02", periods=n)
+        closes = np.linspace(100, 120, n)
+        df = pd.DataFrame(
+            {"Open": closes, "High": closes + 1, "Low": closes - 1,
+             "Close": closes, "Volume": [1_000_000] * n},
+            index=dates,
+        )
+        df["vol_breakout_buy"] = False
+        df["vol_breakout_sell"] = False
+        df["vol_ratio"] = 1.5
+        df.loc[df.index[20], "vol_breakout_buy"] = True
+        from plotly.subplots import make_subplots
+        vb = VolumeBreakout()
+        fig = make_subplots(rows=1, cols=1)
+        vb.plot(fig, df, row=1)
+        trace_names = [t.name for t in fig.data]
+        assert "Vol Breakout ↑" in trace_names

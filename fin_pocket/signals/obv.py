@@ -35,6 +35,19 @@ class OBV(BaseSignal):
 
         return df
 
+    @staticmethod
+    def _fmt(value: float) -> str:
+        """Format large numbers with K/M/B suffixes."""
+        sign = "-" if value < 0 else ""
+        v = abs(value)
+        if v >= 1e9:
+            return f"{sign}{v / 1e9:.2f}B"
+        if v >= 1e6:
+            return f"{sign}{v / 1e6:.2f}M"
+        if v >= 1e3:
+            return f"{sign}{v / 1e3:.1f}K"
+        return f"{sign}{v:,.0f}"
+
     def plot(self, fig: go.Figure, data: pd.DataFrame, row: int = 1) -> go.Figure:
         fig.add_trace(
             go.Scatter(
@@ -66,14 +79,20 @@ class OBV(BaseSignal):
 
         last = data.iloc[-1]
         x_last = data.index[-1]
-        for val, color, label, yoff in [
-            (last["OBV"], "#26C6DA", "OBV", 8),
-            (last["OBV_MA"], "#FFA726", f"MA{self.ma_period}", -8),
+
+        obv_val = last["OBV"]
+        ma_val = last["OBV_MA"]
+        obv_on_top = obv_val >= ma_val
+
+        for val, color, label, on_top in [
+            (obv_val, "#26C6DA", "OBV", obv_on_top),
+            (ma_val, "#FFA726", f"MA{self.ma_period}", not obv_on_top),
         ]:
             fig.add_annotation(
                 x=x_last, y=val,
-                text=f" {label}: {val:,.0f}",
-                showarrow=False, xanchor="left", xshift=5, yshift=yoff,
+                text=f" {label}: {self._fmt(val)}",
+                showarrow=False, xanchor="left", xshift=5,
+                yshift=10 if on_top else -10,
                 font=dict(color=color, size=9),
                 row=row, col=1,
             )
