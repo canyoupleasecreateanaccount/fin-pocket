@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import plotly.graph_objects as go
 from .base import BaseSignal
 
@@ -45,8 +44,8 @@ class Fibonacci(BaseSignal):
 
     def _find_major_swings(self, data: pd.DataFrame):
         """
-        Finds the last significant swing high and swing low
-        within recent_bars.
+        Finds the most significant swing high and swing low pair
+        within recent_bars, preferring the pair with the largest price range.
         """
         recent = data.tail(self.recent_bars) if len(data) > self.recent_bars else data
         highs = recent["High"].values
@@ -70,45 +69,37 @@ class Fibonacci(BaseSignal):
         if not swing_highs or not swing_lows:
             return None, None, None
 
-        last_sh = swing_highs[-1]
-        last_sl = swing_lows[-1]
+        best_pair = None
+        best_range = 0
 
-        if last_sh[0] > last_sl[0]:
-            move_pct = (last_sh[1] - last_sl[1]) / last_sl[1] * 100 if last_sl[1] != 0 else 0
-            if move_pct >= self.min_move_pct:
-                return (
-                    {"price": last_sl[1], "date": last_sl[2], "idx": last_sl[0]},
-                    {"price": last_sh[1], "date": last_sh[2], "idx": last_sh[0]},
-                    "up",
-                )
-        else:
-            move_pct = (last_sh[1] - last_sl[1]) / last_sl[1] * 100 if last_sl[1] != 0 else 0
-            if move_pct >= self.min_move_pct:
-                return (
-                    {"price": last_sh[1], "date": last_sh[2], "idx": last_sh[0]},
-                    {"price": last_sl[1], "date": last_sl[2], "idx": last_sl[0]},
-                    "down",
-                )
+        for sh in swing_highs:
+            for sl in swing_lows:
+                if sh[0] == sl[0]:
+                    continue
+                price_range = sh[1] - sl[1]
+                if price_range <= 0:
+                    continue
+                move_pct = price_range / sl[1] * 100 if sl[1] != 0 else 0
+                if move_pct < self.min_move_pct:
+                    continue
+                if price_range > best_range:
+                    best_range = price_range
+                    if sh[0] > sl[0]:
+                        best_pair = (
+                            {"price": sl[1], "date": sl[2], "idx": sl[0]},
+                            {"price": sh[1], "date": sh[2], "idx": sh[0]},
+                            "up",
+                        )
+                    else:
+                        best_pair = (
+                            {"price": sh[1], "date": sh[2], "idx": sh[0]},
+                            {"price": sl[1], "date": sl[2], "idx": sl[0]},
+                            "down",
+                        )
 
-        best_sh = max(swing_highs, key=lambda x: x[1])
-        best_sl = min(swing_lows, key=lambda x: x[1])
-        move_pct = (best_sh[1] - best_sl[1]) / best_sl[1] * 100 if best_sl[1] != 0 else 0
-
-        if move_pct < self.min_move_pct:
-            return None, None, None
-
-        if best_sh[0] > best_sl[0]:
-            return (
-                {"price": best_sl[1], "date": best_sl[2], "idx": best_sl[0]},
-                {"price": best_sh[1], "date": best_sh[2], "idx": best_sh[0]},
-                "up",
-            )
-        else:
-            return (
-                {"price": best_sh[1], "date": best_sh[2], "idx": best_sh[0]},
-                {"price": best_sl[1], "date": best_sl[2], "idx": best_sl[0]},
-                "down",
-            )
+        if best_pair:
+            return best_pair
+        return None, None, None
 
     def calculate(self, data: pd.DataFrame) -> pd.DataFrame:
         df = data.copy()
@@ -148,11 +139,18 @@ class Fibonacci(BaseSignal):
         if not self._levels:
             return fig
 
-        n = len(data)
-        quarter_start = max(0, n - n // 4)
-        x_line_start = data.index[quarter_start]
         x_end = data.index[-1]
 
+        earlier_swing_date = None
+        if self._swing_low and self._swing_high:
+            sh_date = self._swing_high["date"]
+            sl_date = self._swing_low["date"]
+            earlier_swing_date = min(sh_date, sl_date)
+
+        x_line_start = earlier_swing_date if earlier_swing_date is not None else data.index[max(0, len(data) - len(data) // 4)]
+
+        prev_price = None
+        prev_color = None
         for lv in self._levels:
             fib = lv["fib"]
             price = lv["price"]
@@ -172,6 +170,23 @@ class Fibonacci(BaseSignal):
                 col=1,
             )
 
+            if prev_price is not None:
+                fill_color = prev_color.replace("0.7)", "0.07)")
+                fig.add_trace(
+                    go.Scatter(
+                        x=[x_line_start, x_end, x_end, x_line_start, x_line_start],
+                        y=[prev_price, prev_price, price, price, prev_price],
+                        fill="toself",
+                        fillcolor=fill_color,
+                        line=dict(width=0),
+                        mode="lines",
+                        showlegend=False,
+                        hoverinfo="skip",
+                    ),
+                    row=row,
+                    col=1,
+                )
+
             fig.add_annotation(
                 x=x_end,
                 y=price,
@@ -184,39 +199,30 @@ class Fibonacci(BaseSignal):
                 col=1,
             )
 
+            prev_price = price
+            prev_color = color
+
         if self._swing_low and self._swing_high:
             sh_date = self._swing_high["date"]
             sl_date = self._swing_low["date"]
-            x_start = data.index[0]
 
-            if sh_date >= x_start and sh_date <= x_end:
-                fig.add_trace(
-                    go.Scatter(
-                        x=[sh_date],
-                        y=[self._swing_high["price"]],
-                        mode="markers",
-                        marker=dict(size=8, color="#F44336", symbol="diamond"),
-                        name="Fib Swing",
-                        showlegend=True,
-                        hovertemplate=f"Swing High: {self._swing_high['price']:.2f}<extra></extra>",
-                    ),
-                    row=row,
-                    col=1,
-                )
-
-            if sl_date >= x_start and sl_date <= x_end:
-                fig.add_trace(
-                    go.Scatter(
-                        x=[sl_date],
-                        y=[self._swing_low["price"]],
-                        mode="markers",
-                        marker=dict(size=8, color="#4CAF50", symbol="diamond"),
-                        name=None,
-                        showlegend=False,
-                        hovertemplate=f"Swing Low: {self._swing_low['price']:.2f}<extra></extra>",
-                    ),
-                    row=row,
-                    col=1,
-                )
+            fig.add_trace(
+                go.Scatter(
+                    x=[sh_date, sl_date],
+                    y=[self._swing_high["price"], self._swing_low["price"]],
+                    mode="lines+markers",
+                    line=dict(color="rgba(255, 255, 255, 0.5)", width=1.5, dash="dot"),
+                    marker=dict(size=9, symbol="diamond",
+                                color=["#F44336", "#4CAF50"]),
+                    name="Fib Swing",
+                    showlegend=True,
+                    hovertemplate=[
+                        f"Swing High: {self._swing_high['price']:.2f}<extra></extra>",
+                        f"Swing Low: {self._swing_low['price']:.2f}<extra></extra>",
+                    ],
+                ),
+                row=row,
+                col=1,
+            )
 
         return fig

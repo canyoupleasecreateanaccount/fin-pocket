@@ -47,3 +47,30 @@ class TestMACrossover:
         original_cols = set(sample_ohlcv.columns)
         mac.calculate(sample_ohlcv)
         assert set(sample_ohlcv.columns) == original_cols
+
+    def test_golden_cross_plotted(self):
+        """Ensure golden cross markers are added when a golden cross occurs."""
+        n = 300
+        np.random.seed(11)
+        dates = pd.bdate_range("2023-01-02", periods=n)
+        closes = np.empty(n)
+        price = 100.0
+        for i in range(n):
+            if i < 150:
+                price *= 1 + np.random.normal(-0.003, 0.004)
+            else:
+                price *= 1 + np.random.normal(0.005, 0.004)
+            closes[i] = price
+        df = pd.DataFrame(
+            {"Open": closes, "High": closes + 1, "Low": closes - 1,
+             "Close": closes, "Volume": [1_000_000] * n},
+            index=dates,
+        )
+        mac = MACrossover()
+        df = mac.calculate(df)
+        fig = make_subplots(rows=1, cols=1)
+        mac.plot(fig, df, row=1)
+        golden = df[df["golden_cross"]]
+        if not golden.empty:
+            trace_names = [t.name for t in fig.data]
+            assert "Golden Cross" in trace_names

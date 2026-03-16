@@ -71,3 +71,66 @@ class TestOBV:
         obv = OBV()
         result = obv.calculate(df)
         assert (result["OBV"] == 0).all()
+
+
+class TestOBVFormat:
+    def test_fmt_billions(self):
+        assert OBV._fmt(2_500_000_000) == "2.50B"
+
+    def test_fmt_negative_billions(self):
+        assert OBV._fmt(-1_200_000_000) == "-1.20B"
+
+    def test_fmt_millions(self):
+        assert OBV._fmt(25_867_830) == "25.87M"
+
+    def test_fmt_negative_millions(self):
+        assert OBV._fmt(-3_450_000) == "-3.45M"
+
+    def test_fmt_thousands(self):
+        assert OBV._fmt(7_500) == "7.5K"
+
+    def test_fmt_negative_thousands(self):
+        assert OBV._fmt(-1_234) == "-1.2K"
+
+    def test_fmt_small_number(self):
+        assert OBV._fmt(42) == "42"
+
+    def test_fmt_zero(self):
+        assert OBV._fmt(0) == "0"
+
+    def test_fmt_negative_small(self):
+        assert OBV._fmt(-99) == "-99"
+
+    def test_plot_obv_above_ma(self):
+        """OBV > MA: OBV label shifted up, MA label shifted down."""
+        dates = pd.bdate_range("2024-01-02", periods=10)
+        closes = [100, 102, 104, 106, 108, 110, 112, 114, 116, 118]
+        df = pd.DataFrame(
+            {"Open": closes, "High": [c + 1 for c in closes],
+             "Low": [c - 1 for c in closes], "Close": closes,
+             "Volume": [1_000_000] * 10},
+            index=dates,
+        )
+        obv = OBV()
+        df = obv.calculate(df)
+        fig = make_subplots(rows=2, cols=1)
+        obv.plot(fig, df, row=1)
+        annotations = [a for a in fig.layout.annotations if "OBV" in a.text or "MA" in a.text]
+        assert len(annotations) == 2
+
+    def test_plot_obv_below_ma(self):
+        """OBV < MA: MA label shifted up, OBV label shifted down."""
+        dates = pd.bdate_range("2024-01-02", periods=10)
+        closes = [118, 116, 114, 112, 110, 108, 106, 104, 102, 100]
+        df = pd.DataFrame(
+            {"Open": closes, "High": [c + 1 for c in closes],
+             "Low": [c - 1 for c in closes], "Close": closes,
+             "Volume": [1_000_000] * 10},
+            index=dates,
+        )
+        obv = OBV()
+        df = obv.calculate(df)
+        fig = make_subplots(rows=2, cols=1)
+        obv.plot(fig, df, row=1)
+        annotations = [a for a in fig.layout.annotations if "OBV" in a.text or "MA" in a.text]
+        assert len(annotations) == 2

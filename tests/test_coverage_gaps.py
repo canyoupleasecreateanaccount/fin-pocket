@@ -620,20 +620,21 @@ class TestWedgeAlgorithmEdges:
 # ---------- Fibonacci: all direction paths ----------
 
 class TestFibonacciAllPaths:
-    def test_last_swing_high_after_low_down_direction(self):
-        """Line 87: last_sh[0] < last_sl[0] → down direction."""
+    def test_down_direction_in_calculate(self):
+        """Ensures the 'down' branch in calculate() is executed."""
         n = 200
         np.random.seed(77)
         dates = pd.bdate_range("2024-01-02", periods=n)
-        closes = []
+        closes = np.empty(n)
         price = 100.0
         for i in range(n):
-            if i < 100:
-                price *= 1 + np.random.normal(0.003, 0.005)
+            if i < 50:
+                price += 3.0 + np.random.normal(0, 0.2)
+            elif i < 150:
+                price -= 2.0 + np.random.normal(0, 0.2)
             else:
-                price *= 1 + np.random.normal(-0.006, 0.005)
-            closes.append(price)
-        closes = np.array(closes)
+                price += np.random.normal(0, 0.2)
+            closes[i] = price
         highs = closes + np.abs(np.random.normal(0.5, 0.3, n))
         lows = closes - np.abs(np.random.normal(0.5, 0.3, n))
         df = pd.DataFrame(
@@ -641,26 +642,26 @@ class TestFibonacciAllPaths:
              "Volume": np.random.randint(1_000_000, 5_000_000, n)},
             index=dates,
         )
-        fib = Fibonacci()
+        fib = Fibonacci(min_move_pct=5.0)
         fib.calculate(df)
-        assert isinstance(fib._levels, list)
+        assert fib._direction == "down"
+        assert fib._swing_high["price"] > fib._swing_low["price"]
 
-    def test_best_swing_down_fallback(self):
-        """Lines 100-107: best_sh[0] < best_sl[0] → fallback down path."""
+    def test_up_direction_in_calculate(self):
+        """Ensures the 'up' branch in calculate() is executed."""
         n = 200
         np.random.seed(55)
         dates = pd.bdate_range("2024-01-02", periods=n)
-        closes = []
+        closes = np.empty(n)
         price = 200.0
         for i in range(n):
-            if i < 30:
-                price *= 1 + np.random.normal(0.001, 0.002)
-            elif i < 60:
-                price *= 1 + np.random.normal(-0.001, 0.002)
+            if i < 50:
+                price -= 2.0 + np.random.normal(0, 0.2)
+            elif i < 150:
+                price += 3.0 + np.random.normal(0, 0.2)
             else:
-                price *= 1 + np.random.normal(0.0005, 0.003)
-            closes.append(price)
-        closes = np.array(closes)
+                price += np.random.normal(0, 0.2)
+            closes[i] = price
         highs = closes + np.abs(np.random.normal(0.3, 0.2, n))
         lows = closes - np.abs(np.random.normal(0.3, 0.2, n))
         df = pd.DataFrame(
@@ -668,12 +669,12 @@ class TestFibonacciAllPaths:
              "Volume": np.random.randint(1_000_000, 5_000_000, n)},
             index=dates,
         )
-        fib = Fibonacci(min_move_pct=0.5)
+        fib = Fibonacci(min_move_pct=5.0)
         fib.calculate(df)
-        assert isinstance(fib._levels, list)
+        assert fib._direction == "up"
 
     def test_fibonacci_swing_low_not_visible(self):
-        """Lines 130-133: swing markers outside the display window."""
+        """Swing markers outside the display window."""
         df = _sample(200)
         fib = Fibonacci()
         fib.calculate(df)
