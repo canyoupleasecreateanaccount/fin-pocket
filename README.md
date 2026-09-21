@@ -215,6 +215,11 @@ Email: solveme.solutions@gmail.com
 
 <a href="https://www.buymeacoffee.com/yourCrowley" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" ></a>
 
+- **BTC:** `bc1qdmesklh36r03vgw7m6zcxjhakvsxe4q45nk0p4`
+- **ETH / BNB / MATIC:** `0x3EC81929e06950322d5125d8e6CA834F3d9B21f8`
+- **SOL:** `86VzJkNe69YZvnKXrUGwoMVJtPp5yk67eQJokBJph4XW`
+- **TRX:** `TEak8XxSGDeeSY11Dj6BDpiPWadVm75E2C`
+
 ## License
 
 Proprietary — for personal use only. See [LICENSE](LICENSE).
