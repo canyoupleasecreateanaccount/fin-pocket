@@ -106,29 +106,25 @@ class TestCLIMain:
         captured = capsys.readouterr()
         assert "Chart saved to test.html" in captured.out
 
+    @pytest.mark.parametrize("error", [
+        ConnectionError("Network failed"),
+        ValueError("No data"),
+    ], ids=["connection_error", "value_error"])
+    @patch("fin_pocket.cli.Chart")
     @patch("fin_pocket.cli.DataProvider")
-    def test_main_connection_error(self, MockProvider, capsys):
-        mock_provider = MagicMock()
-        mock_provider.fetch.side_effect = ConnectionError("Network failed")
-        MockProvider.return_value = mock_provider
+    def test_cli_entry_fetch_error(self, MockProvider, MockChart, capsys, error):
+        MockProvider.return_value.fetch.side_effect = error
 
-        args = parse_args(["FAIL"])
-        main(args)
+        with patch("fin_pocket.cli.parse_args", return_value=parse_args(["FAIL"])):
+            with pytest.raises(SystemExit) as exc_info:
+                _cli_entry()
 
+        assert isinstance(exc_info.value.code, int)
+        assert exc_info.value.code != 0
         captured = capsys.readouterr()
-        assert "Error:" in captured.out
-
-    @patch("fin_pocket.cli.DataProvider")
-    def test_main_value_error(self, MockProvider, capsys):
-        mock_provider = MagicMock()
-        mock_provider.fetch.side_effect = ValueError("No data")
-        MockProvider.return_value = mock_provider
-
-        args = parse_args(["EMPTY"])
-        main(args)
-
-        captured = capsys.readouterr()
-        assert "Error:" in captured.out
+        assert captured.out == ""
+        assert captured.err == f"Error: {error}\n"
+        MockChart.assert_not_called()
 
     @patch("fin_pocket.cli.Chart")
     @patch("fin_pocket.cli.DataProvider")
@@ -189,12 +185,19 @@ class TestCLIMain:
         ]
         assert "BollingerBands" in signal_types
 
-    @patch("fin_pocket.cli.main")
-    def test_cli_entry(self, mock_main):
-        with patch("fin_pocket.cli.parse_args") as mock_parse:
-            mock_parse.return_value = MagicMock()
-            _cli_entry()
-            mock_main.assert_called_once()
+    @patch("fin_pocket.cli.Chart")
+    @patch("fin_pocket.cli.DataProvider")
+    def test_cli_entry_success(self, MockProvider, MockChart, capsys):
+        MockProvider.return_value.fetch.return_value = _sample_df()
+
+        with patch("fin_pocket.cli.parse_args", return_value=parse_args(["AAPL"])):
+            assert _cli_entry() is None
+
+        MockProvider.return_value.fetch.assert_called_once_with(period="3y", interval="1d")
+        MockChart.return_value.show.assert_called_once()
+        captured = capsys.readouterr()
+        assert "Loaded 100 records for AAPL (daily)" in captured.out
+        assert captured.err == ""
 
 
 # ---------- Chart show / save ----------
