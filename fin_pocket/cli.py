@@ -9,6 +9,7 @@ Usage:
 """
 
 import argparse
+import sys
 
 from fin_pocket.data import DataProvider
 from fin_pocket.signals import (
@@ -103,8 +104,8 @@ def main(args: argparse.Namespace) -> None:
     try:
         data = provider.fetch(period=config["period"], interval=config["interval"])
     except (ConnectionError, ValueError) as exc:
-        print(f"Error: {exc}")
-        return
+        print(f"Error: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
 
     print(f"Loaded {len(data)} records for {args.ticker} ({args.timeframe})")
     print(f"Period: {data.index[0]} — {data.index[-1]}")
