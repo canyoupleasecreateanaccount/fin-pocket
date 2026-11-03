@@ -40,6 +40,25 @@ class TestDataProvider:
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 10
 
+    @pytest.mark.parametrize("period", [None, "6mo"])
+    @patch("fin_pocket.data.provider.yf")
+    def test_fetch_with_end_without_start(self, mock_yf, period):
+        history = _make_history_df()
+        mock_ticker = mock_yf.Ticker.return_value
+        mock_ticker.history.return_value = history
+
+        dp = DataProvider("AAPL")
+        kwargs = {} if period is None else {"period": period}
+        df = dp.fetch(end="2024-06-01", interval="1h", **kwargs)
+
+        mock_ticker.history.assert_called_once_with(
+            period="2y" if period is None else period,
+            end="2024-06-01",
+            interval="1h",
+        )
+        assert df is history
+        assert dp.data is df
+
     @patch("fin_pocket.data.provider.yf")
     def test_fetch_with_start_end(self, mock_yf):
         mock_ticker = MagicMock()
