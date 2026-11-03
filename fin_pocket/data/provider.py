@@ -37,6 +37,8 @@ class DataProvider:
             
             if start:
                 self._data = ticker_obj.history(start=start, end=end, interval=interval)
+            elif end is not None:
+                self._data = ticker_obj.history(period=period, end=end, interval=interval)
             else:
                 self._data = ticker_obj.history(period=period, interval=interval)
         except Exception as exc:
